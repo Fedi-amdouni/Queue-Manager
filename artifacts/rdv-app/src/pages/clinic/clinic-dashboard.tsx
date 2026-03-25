@@ -41,7 +41,7 @@ export default function ClinicDashboard() {
         if (user?.organizationId) {
           const [orgsData, svcs] = await Promise.all([
             apiFetch<Organization>(`/organizations/${user.organizationId}`, {}, token),
-            apiFetch<Service[]>(`/services/organization/${user.organizationId}`, {}, token),
+            apiFetch<Service[]>(`/organizations/${user.organizationId}/services`, {}, token),
           ]);
           setOrg(orgsData);
           setServices(svcs);

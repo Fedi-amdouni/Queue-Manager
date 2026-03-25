@@ -16,6 +16,7 @@ import ClinicDashboard from "@/pages/clinic/clinic-dashboard";
 import ClinicQueue from "@/pages/clinic/clinic-queue";
 import ClinicAppointments from "@/pages/clinic/clinic-appointments";
 import ClinicCallScreen from "@/pages/clinic/clinic-call-screen";
+import ClinicServices from "@/pages/clinic/clinic-services";
 
 import AdminDashboard from "@/pages/admin/admin-dashboard";
 import AdminOrganizations from "@/pages/admin/admin-organizations";
@@ -87,6 +88,9 @@ function Router() {
 
       <Route path="/clinic">
         <ProtectedRoute component={ClinicDashboard} allowedRoles={["CLINIC"]} />
+      </Route>
+      <Route path="/clinic/services">
+        <ProtectedRoute component={ClinicServices} allowedRoles={["CLINIC"]} />
       </Route>
       <Route path="/clinic/queue">
         <ProtectedRoute component={ClinicQueue} allowedRoles={["CLINIC"]} />

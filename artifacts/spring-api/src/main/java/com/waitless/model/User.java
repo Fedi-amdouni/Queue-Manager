@@ -33,7 +33,8 @@ public class User {
     @Column(name = "organization_id")
     private Long organizationId;
 
-    @Column(name = "is_blocked")
+    @Builder.Default
+    @Column(name = "is_blocked", nullable = false, columnDefinition = "boolean default false")
     private boolean blocked = false;
 
     @Column(name = "created_at")

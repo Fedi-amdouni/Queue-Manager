@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { Calendar, LogOut, Monitor, Users, LayoutDashboard } from "lucide-react";
+import { Calendar, LogOut, Monitor, Users, LayoutDashboard, Settings2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Tableau de bord", icon: LayoutDashboard, href: "/clinic" },
+  { label: "Mes services", icon: Settings2, href: "/clinic/services" },
   { label: "File d'attente", icon: Users, href: "/clinic/queue" },
   { label: "Rendez-vous", icon: Calendar, href: "/clinic/appointments" },
   { label: "Écran d'appel", icon: Monitor, href: "/clinic/call-screen" },
