@@ -11,14 +11,14 @@ import { Building2, Stethoscope, Calendar, CheckCircle2, ChevronRight, ChevronLe
 import { cn } from "@/lib/utils";
 
 interface Organization {
-  id: number; name: string; orgType: string; city?: string; address?: string;
+  id: number; name: string; type: string; city?: string; address?: string;
 }
 interface Service {
   id: number; name: string; description?: string;
 }
 
 const ORG_TYPE_LABELS: Record<string, string> = {
-  CLINIC: "Clinique", HOSPITAL: "Hôpital", LAB: "Laboratoire",
+  CLINIC: "Clinique", HOSPITAL: "Hôpital", LABORATORY: "Laboratoire",
   RADIOLOGY: "Radiologie", DENTAL: "Dentaire", PARAMEDICAL: "Paramédical", OTHER: "Autre"
 };
 
@@ -46,7 +46,7 @@ export default function BookAppointment() {
 
   useEffect(() => {
     if (selectedOrg) {
-      apiFetch<Service[]>(`/services/organization/${selectedOrg.id}`).then(setServices).catch(() => {});
+      apiFetch<Service[]>(`/organizations/${selectedOrg.id}/services`).then(setServices).catch(() => {});
     }
   }, [selectedOrg]);
 
@@ -151,7 +151,7 @@ export default function BookAppointment() {
                       </div>
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900">{org.name}</p>
-                        <p className="text-sm text-gray-500">{ORG_TYPE_LABELS[org.orgType] ?? org.orgType}{org.city ? ` · ${org.city}` : ""}</p>
+                        <p className="text-sm text-gray-500">{ORG_TYPE_LABELS[org.type] ?? org.type}{org.city ? ` · ${org.city}` : ""}</p>
                       </div>
                       {selectedOrg?.id === org.id && <CheckCircle2 className="w-5 h-5 text-blue-600" />}
                     </CardContent>

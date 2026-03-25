@@ -35,7 +35,7 @@ export default function ClinicQueue() {
 
   useEffect(() => {
     if (user?.organizationId) {
-      apiFetch<Service[]>(`/services/organization/${user.organizationId}`, {}, token)
+      apiFetch<Service[]>(`/organizations/${user.organizationId}/services`, {}, token)
         .then(svcs => {
           setServices(svcs);
           if (svcs.length > 0) setSelectedServiceId(svcs[0].id);
