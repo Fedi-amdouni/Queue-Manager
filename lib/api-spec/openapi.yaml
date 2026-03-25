@@ -1,29 +1,444 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: WaitLess - API de gestion de rendez-vous et file d'attente
 servers:
   - url: /api
-    description: Base API path
+    description: Spring Boot API
 tags:
-  - name: health
-    description: Health operations
+  - name: organizations
+    description: Gestion des organisations
+  - name: services
+    description: Gestion des services/départements
+  - name: appointments
+    description: Gestion des rendez-vous
+  - name: queue
+    description: Gestion de la file d'attente
+  - name: dashboard
+    description: Statistiques et tableau de bord
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
+      tags: [organizations]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
-          description: Healthy
+          description: OK
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /organizations:
+    get:
+      operationId: getOrganizations
+      tags: [organizations]
+      summary: Liste des organisations
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organization"
+    post:
+      operationId: createOrganization
+      tags: [organizations]
+      summary: Créer une organisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  /organizations/{id}:
+    get:
+      operationId: getOrganizationById
+      tags: [organizations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    put:
+      operationId: updateOrganization
+      tags: [organizations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+    delete:
+      operationId: deleteOrganization
+      tags: [organizations]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+
+  /organizations/{orgId}/services:
+    get:
+      operationId: getServicesByOrganization
+      tags: [services]
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceDept"
+    post:
+      operationId: createService
+      tags: [services]
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceDeptInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceDept"
+
+  /services/{id}:
+    get:
+      operationId: getServiceById
+      tags: [services]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceDept"
+    put:
+      operationId: updateService
+      tags: [services]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceDeptInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceDept"
+    delete:
+      operationId: deleteService
+      tags: [services]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+
+  /appointments:
+    get:
+      operationId: getAppointments
+      tags: [appointments]
+      parameters:
+        - name: serviceDeptId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    get:
+      operationId: getAppointmentById
+      tags: [appointments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    put:
+      operationId: updateAppointment
+      tags: [appointments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+    delete:
+      operationId: deleteAppointment
+      tags: [appointments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
+
+  /appointments/{id}/status:
+    patch:
+      operationId: updateAppointmentStatus
+      tags: [appointments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /queue/{serviceDeptId}:
+    get:
+      operationId: getQueue
+      tags: [queue]
+      parameters:
+        - name: serviceDeptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QueueTicket"
+
+  /queue/join:
+    post:
+      operationId: joinQueue
+      tags: [queue]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueueJoinInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueTicket"
+
+  /queue/{serviceDeptId}/call-next:
+    post:
+      operationId: callNextInQueue
+      tags: [queue]
+      parameters:
+        - name: serviceDeptId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueTicket"
+
+  /queue/tickets/{ticketId}:
+    get:
+      operationId: getTicket
+      tags: [queue]
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueTicket"
+
+  /queue/tickets/{ticketId}/status:
+    patch:
+      operationId: updateTicketStatus
+      tags: [queue]
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueTicket"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Statistiques globales
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +449,231 @@ components:
       required:
         - status
 
+    OrgType:
+      type: string
+      enum: [LABORATORY, RADIOLOGY, DENTAL, PARAMEDICAL, ADMINISTRATION, CLINIC, OTHER]
+
+    Priority:
+      type: string
+      enum: [NORMAL, URGENT, PREGNANT, ELDERLY, DISABLED]
+
+    AppointmentStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+
+    TicketStatus:
+      type: string
+      enum: [WAITING, CALLED, IN_SERVICE, COMPLETED, ABSENT, CANCELLED]
+
+    ResourceType:
+      type: string
+      enum: [PRACTITIONER, MACHINE, DESK, ROOM]
+
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/OrgType"
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        subscriptionPlan:
+          type: string
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+
+    OrganizationInput:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/OrgType"
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        subscriptionPlan:
+          type: string
+      required:
+        - name
+        - type
+
+    ServiceDept:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        avgDurationMinutes:
+          type: integer
+        maxQueueSize:
+          type: integer
+        active:
+          type: boolean
+      required:
+        - id
+        - name
+
+    ServiceDeptInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        avgDurationMinutes:
+          type: integer
+        maxQueueSize:
+          type: integer
+      required:
+        - name
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        patientName:
+          type: string
+        patientPhone:
+          type: string
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+        status:
+          $ref: "#/components/schemas/AppointmentStatus"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - patientName
+        - appointmentDate
+        - appointmentTime
+
+    AppointmentInput:
+      type: object
+      properties:
+        patientName:
+          type: string
+        patientPhone:
+          type: string
+        appointmentDate:
+          type: string
+          format: date
+        appointmentTime:
+          type: string
+        priority:
+          $ref: "#/components/schemas/Priority"
+        notes:
+          type: string
+        serviceDeptId:
+          type: integer
+        resourceId:
+          type: integer
+      required:
+        - patientName
+        - appointmentDate
+        - appointmentTime
+        - serviceDeptId
+
+    QueueTicket:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticketNumber:
+          type: integer
+        patientName:
+          type: string
+        patientPhone:
+          type: string
+        status:
+          $ref: "#/components/schemas/TicketStatus"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        estimatedWaitMinutes:
+          type: integer
+        joinedAt:
+          type: string
+          format: date-time
+        calledAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - ticketNumber
+        - patientName
+        - status
+
+    QueueJoinInput:
+      type: object
+      properties:
+        patientName:
+          type: string
+        patientPhone:
+          type: string
+        priority:
+          $ref: "#/components/schemas/Priority"
+        serviceDeptId:
+          type: integer
+        resourceId:
+          type: integer
+      required:
+        - patientName
+        - serviceDeptId
+
+    StatusUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    DashboardStats:
+      type: object
+      properties:
+        totalOrganizations:
+          type: integer
+        totalAppointmentsToday:
+          type: integer
+        pendingAppointments:
+          type: integer
+        completedAppointments:
+          type: integer
+        totalWaiting:
+          type: integer
+        totalServedToday:
+          type: integer
+        avgWaitMinutes:
+          type: number
+      required:
+        - totalOrganizations
+        - totalWaiting

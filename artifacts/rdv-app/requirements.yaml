@@ -1,0 +1,16 @@
+packages:
+  "framer-motion": "Animations for page transitions and queue real-time updates"
+  "date-fns": "Date formatting and manipulation for appointments"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility to merge Tailwind classes safely"
+  "lucide-react": "Beautiful consistent icons for the UI"
+
+images:
+  - path: "artifacts/rdv-app/public/images/logo.png"
+    description: "Modern minimalist healthcare and medical queue management logo, abstract cross mixed with a clock, blue and white, clean vector, transparent background style"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated Orval hooks from @workspace/api-client-react
+  - React Query v5 is used for data fetching and caching
+  - Interface is in French as requested

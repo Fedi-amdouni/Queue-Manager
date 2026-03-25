@@ -1,96 +1,98 @@
-# Workspace
+# WaitLess - Gestion RDV & File d'attente
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Plateforme de gestion de rendez-vous et file d'attente en temps réel pour la Tunisie.
+Cible : médecins, laboratoires, radios, administrations, cabinets paramédicaux.
+
+## Architecture
+
+- **Backend**: Java Spring Boot 3.2.5 (Maven) avec PostgreSQL + Hibernate/JPA
+- **Frontend**: React + Vite + TailwindCSS
+- **Monorepo**: pnpm workspaces (Node.js/TypeScript pour tooling)
 
 ## Stack
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+### Backend (Spring Boot)
+- Java 19 (GraalVM 22.3)
+- Spring Boot 3.2.5
+- Spring Data JPA + Hibernate 6
+- PostgreSQL (Replit built-in)
+- Lombok
+- SpringDoc OpenAPI (Swagger UI à `/api/swagger-ui.html`)
+- Port: 8080, context path: `/api`
+
+### Frontend (React)
+- React 18 + Vite
+- TailwindCSS
+- Framer Motion (animations)
+- Lucide React (icônes)
+- React Query (hooks API générés)
+- Port: 23449, base path: `/`
 
 ## Structure
 
-```text
-artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+```
+artifacts/
+├── api-server/          # Artifact config (pointe vers spring-api)
+├── spring-api/          # Code source Java Spring Boot
+│   ├── pom.xml
+│   └── src/main/java/com/waitless/
+│       ├── model/       # Entités JPA (Organization, ServiceDept, Resource, Appointment, QueueTicket)
+│       ├── repository/  # Spring Data JPA repositories
+│       ├── service/     # Logique métier
+│       ├── controller/  # REST controllers
+│       ├── dto/         # Data Transfer Objects
+│       └── config/      # CORS config
+└── rdv-app/             # Frontend React
+    └── src/
+        ├── pages/       # Dashboard, Organizations, Appointments, Queue, CallScreen
+        ├── components/  # UI components + Layout
+        └── lib/         # Utils
+lib/
+├── api-spec/openapi.yaml  # OpenAPI spec (source of truth)
+├── api-client-react/      # React Query hooks générés
+└── api-zod/               # Zod schemas générés
 ```
 
-## TypeScript & Composite Projects
+## Domain Entities
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+- **Organization**: clinique, labo, radio, dentiste, paramédical, administration
+- **ServiceDept**: département/service au sein d'une organisation
+- **Resource**: machine, praticien, guichet, salle
+- **Appointment**: rendez-vous avec statut (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
+- **QueueTicket**: ticket file d'attente avec priorité (NORMAL, URGENT, PREGNANT, ELDERLY, DISABLED)
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+## API Endpoints
 
-## Root Scripts
+- `GET/POST /api/organizations` - Gestion des organisations
+- `GET/POST /api/organizations/{id}/services` - Services d'une organisation
+- `GET/POST /api/appointments` - Rendez-vous (filtrés par service + date)
+- `GET/POST /api/queue/{serviceDeptId}` - File d'attente temps réel
+- `POST /api/queue/join` - Rejoindre la file
+- `POST /api/queue/{serviceDeptId}/call-next` - Appeler le suivant
+- `GET /api/dashboard/stats` - Statistiques globales
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+## Running Commands
 
-## Packages
+### Backend Spring Boot
+```bash
+cd artifacts/spring-api && mvn spring-boot:run
+# Or via workflow: "artifacts/api-server: API Server"
+```
 
-### `artifacts/api-server` (`@workspace/api-server`)
+### Frontend React
+```bash
+pnpm --filter @workspace/rdv-app run dev
+# Or via workflow: "artifacts/rdv-app: web"
+```
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+### Codegen (OpenAPI → React hooks + Zod schemas)
+```bash
+pnpm --filter @workspace/api-spec run codegen
+```
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
-
-### `lib/db` (`@workspace/db`)
-
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
-
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
-
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+## Business Model
+- Abonnement mensuel: 20–50 TND
+- Version gratuite limitée
+- Contrats annuels pour grandes structures
