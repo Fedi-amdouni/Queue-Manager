@@ -50,3 +50,4 @@ com/waitless/model/ServiceDept.class
 com/waitless/model/enums/Priority.class
 com/waitless/service/QueueService.class
 com/waitless/service/AppointmentService.class
+com/waitless/config/DataSeeder.class

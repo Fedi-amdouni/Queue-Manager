@@ -32,6 +32,7 @@
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/controller/ServiceDeptController.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/repository/AppointmentRepository.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/controller/AuthController.java
+/home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/config/DataSeeder.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/model/enums/UserRole.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/repository/OrganizationRepository.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/controller/AppointmentController.java

@@ -25,7 +25,7 @@ public class QueueService {
     public List<QueueTicket> getActiveQueue(Long serviceDeptId) {
         return queueTicketRepository.findByServiceDeptIdAndStatusInOrderByPriorityDescJoinedAtAsc(
                 serviceDeptId,
-                List.of(TicketStatus.WAITING, TicketStatus.CALLED)
+                List.of(TicketStatus.WAITING, TicketStatus.CALLED, TicketStatus.COMPLETED, TicketStatus.ABSENT, TicketStatus.CANCELLED)
         );
     }
 

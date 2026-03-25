@@ -1,5 +1,6 @@
 package com.waitless.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.waitless.model.enums.ResourceType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Resource {
 
     @Id

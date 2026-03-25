@@ -1,5 +1,6 @@
 package com.waitless.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.waitless.model.enums.AppointmentStatus;
 import com.waitless.model.enums.Priority;
 import jakarta.persistence.*;
@@ -42,11 +43,13 @@ public class Appointment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_dept_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "resources", "queueTickets"})
     @ToString.Exclude
     private ServiceDept serviceDept;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resource_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "serviceDept"})
     @ToString.Exclude
     private Resource resource;
 
