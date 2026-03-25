@@ -1,0 +1,118 @@
+🎯 Le cœur du produit (commun à tous)
+
+👉 Gestion de file d’attente + rendez-vous + charge réelle
+
+Concept simple :
+
+“Je sais quand venir, et combien de temps je vais attendre.”
+
+Tous ces secteurs ont le même chaos :
+
+Patients / clients arrivent en masse
+Ordre mal géré
+Temps d’attente imprévisible
+Personnel stressé
+1️⃣ Laboratoires d’analyses 🧪
+❌ Problèmes réels
+Pics le matin
+Femmes enceintes, urgences
+Résultats à récupérer physiquement
+✅ Solution
+RDV par type d’analyse (durée différente)
+Priorité (grossesse, urgence)
+File d’attente en temps réel
+Notification “revenez dans 15 min”
+Téléchargement des résultats (option future)
+
+💰 Ils paient sans discuter
+
+2️⃣ Radios / centres d’imagerie 🩻
+❌ Problèmes
+Machines chères → pertes de temps
+Retards en cascade
+Mauvaise coordination
+✅ Solution
+Planning par machine (IRM, scanner…)
+Temps moyen par examen
+Blocage automatique en cas de panne
+File d’attente par machine
+
+💰 Gros clients, peu nombreux, bons abonnements
+
+3️⃣ Administrations privées 🏢
+
+(ex : assurance, mutuelle, banques privées)
+
+❌ Problèmes
+Guichets saturés
+Clients énervés
+Image catastrophique
+✅ Solution
+Ticket numérique (QR code)
+File par service
+Écran d’appel
+Stats de performance
+
+💰 Contrats annuels
+
+4️⃣ Cabinets paramédicaux 🩺
+
+(kiné, orthophoniste, psycho…)
+
+❌ Problèmes
+RDV annulés à la dernière minute
+Mauvais remplissage
+Perte d’argent
+✅ Solution
+Confirmation automatique
+Liste d’attente intelligente
+Paiement à l’avance (optionnel)
+Historique patient
+
+💰 Très nombreux → volume
+
+🧠 La stratégie SMART (ne rate pas ça)
+❌ Erreur classique
+
+Faire 5 produits différents
+
+✅ Bonne approche
+
+UN SEUL PRODUIT
+avec :
+
+Paramètres par activité
+Durée configurable
+Priorités
+Ressources (machines / guichets / salles)
+🧩 Architecture logique (simplifiée)
+
+Entités clés :
+
+Organisation
+Service
+Ressource (machine / praticien / guichet)
+RendezVous
+TicketFile
+Priorité
+
+👉 Le reste est du paramétrage.
+
+🚀 MVP en 30 jours (réaliste)
+Phase 1 (2 semaines)
+RDV + file d’attente
+Dashboard simple
+Notifications
+Phase 2
+Écran d’appel
+Statistiques
+Multi-services
+💬 Comment vendre facilement
+
+Tu dis au client :
+
+“Vos clients attendent moins, vous travaillez mieux.”
+
+C’est tout.
+
+🔥 Mon conseil franc
