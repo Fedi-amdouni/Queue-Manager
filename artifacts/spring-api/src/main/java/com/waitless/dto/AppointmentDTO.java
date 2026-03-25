@@ -17,4 +17,5 @@ public class AppointmentDTO {
     private String notes;
     private Long serviceDeptId;
     private Long resourceId;
+    private Long userId;
 }

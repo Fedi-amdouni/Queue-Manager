@@ -7,6 +7,7 @@ import com.waitless.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,12 +22,25 @@ public class AppointmentController {
 
     @GetMapping
     public List<Appointment> getAll(
-            @RequestParam Long serviceDeptId,
+            @RequestParam(required = false) Long serviceDeptId,
+            @RequestParam(required = false) Long orgId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (date != null) {
+        if (orgId != null && date != null) {
+            return appointmentService.findByOrganizationAndDate(orgId, date);
+        }
+        if (serviceDeptId != null && date != null) {
             return appointmentService.findByServiceAndDate(serviceDeptId, date);
         }
-        return appointmentService.findByService(serviceDeptId);
+        if (serviceDeptId != null) {
+            return appointmentService.findByService(serviceDeptId);
+        }
+        return List.of();
+    }
+
+    @GetMapping("/my")
+    public List<Appointment> getMy(Authentication auth) {
+        Long userId = (Long) auth.getPrincipal();
+        return appointmentService.findByUser(userId);
     }
 
     @GetMapping("/{id}")

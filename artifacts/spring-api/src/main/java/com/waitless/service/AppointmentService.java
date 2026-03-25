@@ -30,6 +30,14 @@ public class AppointmentService {
         return appointmentRepository.findByServiceDeptId(serviceDeptId);
     }
 
+    public List<Appointment> findByUser(Long userId) {
+        return appointmentRepository.findByUserIdOrderByAppointmentDateDescAppointmentTimeDesc(userId);
+    }
+
+    public List<Appointment> findByOrganizationAndDate(Long orgId, LocalDate date) {
+        return appointmentRepository.findByServiceDeptOrganizationIdAndAppointmentDateOrderByAppointmentTimeAsc(orgId, date);
+    }
+
     public Appointment findById(Long id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + id));
@@ -48,6 +56,7 @@ public class AppointmentService {
                 .priority(dto.getPriority())
                 .notes(dto.getNotes())
                 .serviceDept(serviceDept)
+                .userId(dto.getUserId())
                 .build();
 
         if (dto.getResourceId() != null) {

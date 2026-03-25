@@ -50,6 +50,9 @@ public class Appointment {
     @ToString.Exclude
     private Resource resource;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
