@@ -1,5 +1,7 @@
 package com.waitless.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -31,15 +33,21 @@ public class ServiceDept {
     @Column(name = "is_active")
     private boolean active = true;
 
+    @Column(name = "organization_id", insertable = false, updatable = false)
+    private Long organizationId;
+
+    @JsonIgnoreProperties({"services", "hibernateLazyInitializer"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     @ToString.Exclude
     private Organization organization;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "serviceDept", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Resource> resources;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "serviceDept", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<QueueTicket> queueTickets;

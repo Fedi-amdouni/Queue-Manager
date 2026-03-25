@@ -6,22 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/api";
-import { Building2, Plus, Search, Pencil, X, Check } from "lucide-react";
+import { Building2, Plus, Search, Pencil, X, Check, Lock, Unlock, Eye, EyeOff } from "lucide-react";
 
-interface Organization {
-  id: number; name: string; type: string; city?: string;
-  address?: string; phone?: string; email?: string; isActive: boolean;
+interface OrgWithAccount {
+  id: number;
+  name: string;
+  type: string;
+  city?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  isActive: boolean;
+  userId?: number;
+  blocked?: boolean;
 }
 
 const ORG_TYPES = [
-  { value: "CLINIC",        label: "Clinique" },
-  { value: "HOSPITAL",      label: "Hôpital" },
-  { value: "LABORATORY",    label: "Laboratoire" },
-  { value: "RADIOLOGY",     label: "Radiologie" },
-  { value: "DENTAL",        label: "Dentaire" },
-  { value: "PARAMEDICAL",   label: "Paramédical" },
-  { value: "ADMINISTRATION",label: "Administration" },
-  { value: "OTHER",         label: "Autre" },
+  { value: "CLINIC",         label: "Clinique" },
+  { value: "HOSPITAL",       label: "Hôpital" },
+  { value: "LABORATORY",     label: "Laboratoire" },
+  { value: "RADIOLOGY",      label: "Radiologie" },
+  { value: "DENTAL",         label: "Dentaire" },
+  { value: "PARAMEDICAL",    label: "Paramédical" },
+  { value: "ADMINISTRATION", label: "Administration" },
+  { value: "OTHER",          label: "Autre" },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
@@ -41,164 +49,91 @@ const TUNISIAN_CITIES = [
   "Médenine", "Nabeul", "Tataouine", "Béja", "Jendouba", "El Kef",
   "Mahdia", "Sidi Bouzid", "Siliana", "Zaghouan", "Tozeur", "Kebili",
   "Manouba", "La Marsa", "Hammam-Lif", "Hammam Sousse", "Msaken",
-  "Zarzis", "Djerba", "Tabarka", "Hammamet", "Dougga",
+  "Zarzis", "Djerba", "Tabarka", "Hammamet",
 ];
-
-const SERVICES_BY_TYPE: Record<string, string[]> = {
-  CLINIC: [
-    "Médecine générale", "Cardiologie", "Pédiatrie", "Gynécologie",
-    "Neurologie", "Orthopédie", "Ophtalmologie", "Dermatologie",
-    "Gastro-entérologie", "Endocrinologie", "Rhumatologie", "Chirurgie",
-  ],
-  HOSPITAL: [
-    "Urgences", "Réanimation", "Cardiologie", "Chirurgie générale",
-    "Pédiatrie", "Maternité", "Neurologie", "Oncologie",
-    "Orthopédie", "Radiologie", "Bloc opératoire", "Soins intensifs",
-  ],
-  LABORATORY: [
-    "Analyses sanguines", "Biochimie", "Hématologie", "Microbiologie",
-    "Sérologie", "Parasitologie", "Bactériologie", "Virologie",
-    "Immunologie", "Hormonologie", "Coagulation",
-  ],
-  RADIOLOGY: [
-    "Radiographie", "Échographie", "Scanner (TDM)", "IRM",
-    "Mammographie", "Panoramique dentaire", "Ostéodensitométrie",
-    "Écho-doppler", "Fluoroscopie",
-  ],
-  DENTAL: [
-    "Consultation générale", "Détartrage", "Extraction", "Dévitalisation",
-    "Orthodontie", "Implantologie", "Prothèse dentaire", "Blanchiment",
-    "Chirurgie buccale", "Pédodontie",
-  ],
-  PARAMEDICAL: [
-    "Kinésithérapie", "Orthophonie", "Psychologie", "Diététique",
-    "Ergothérapie", "Podologie", "Ostéopathie", "Infirmerie",
-    "Soins à domicile",
-  ],
-  ADMINISTRATION: [
-    "Guichet principal", "Service état civil", "Service cadastre",
-    "Caisse", "Bureau d'information", "Service des passeports",
-    "Service de permis", "Archives",
-  ],
-  OTHER: [],
-};
 
 interface OrgForm {
   name: string; type: string; city: string;
-  address: string; phone: string; email: string;
-  selectedServices: string[];
+  address: string; phone: string; email: string; password: string;
 }
-
 const EMPTY_FORM: OrgForm = {
-  name: "", type: "CLINIC", city: "", address: "",
-  phone: "", email: "", selectedServices: [],
+  name: "", type: "CLINIC", city: "", address: "", phone: "", email: "", password: "",
 };
 
 export default function AdminOrganizations() {
   const { token } = useAuth();
-  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [orgs, setOrgs] = useState<OrgWithAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<OrgForm>(EMPTY_FORM);
+  const [showPass, setShowPass] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [blockingId, setBlockingId] = useState<number | null>(null);
 
   useEffect(() => { loadOrgs(); }, []);
 
   async function loadOrgs() {
     setLoading(true);
-    try { setOrgs(await apiFetch<Organization[]>("/organizations")); }
-    catch {} finally { setLoading(false); }
+    try {
+      const data = await apiFetch<OrgWithAccount[]>("/admin/organizations/accounts", {}, token);
+      setOrgs(data);
+    } catch { setOrgs([]); } finally { setLoading(false); }
   }
 
   function openCreate() {
     setForm(EMPTY_FORM);
-    setEditingId(null);
     setShowForm(true);
     setError("");
-  }
-
-  function openEdit(org: Organization) {
-    setForm({
-      name: org.name, type: org.type, city: org.city ?? "",
-      address: org.address ?? "", phone: org.phone ?? "",
-      email: org.email ?? "", selectedServices: [],
-    });
-    setEditingId(org.id);
-    setShowForm(true);
-    setError("");
-  }
-
-  function toggleService(svc: string) {
-    setForm(p => ({
-      ...p,
-      selectedServices: p.selectedServices.includes(svc)
-        ? p.selectedServices.filter(s => s !== svc)
-        : [...p.selectedServices, svc],
-    }));
-  }
-
-  function handleTypeChange(type: string) {
-    setForm(p => ({ ...p, type, selectedServices: [] }));
   }
 
   async function handleSave() {
     if (!form.name.trim()) { setError("Le nom est obligatoire"); return; }
+    if (!form.email.trim()) { setError("L'email est obligatoire"); return; }
+    if (!form.password || form.password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères"); return;
+    }
     setSaving(true); setError("");
     try {
-      const payload = {
-        name: form.name,
-        type: form.type,
-        city: form.city,
-        address: form.address,
-        phone: form.phone,
-        email: form.email,
-      };
-
-      if (editingId) {
-        await apiFetch(`/organizations/${editingId}`, {
-          method: "PUT", body: JSON.stringify(payload),
-        }, token);
-      } else {
-        const created = await apiFetch<Organization>("/organizations", {
-          method: "POST", body: JSON.stringify(payload),
-        }, token);
-        if (form.selectedServices.length > 0 && created?.id) {
-          await Promise.all(
-            form.selectedServices.map(svcName =>
-              apiFetch(`/organizations/${created.id}/services`, {
-                method: "POST",
-                body: JSON.stringify({ name: svcName }),
-              }, token)
-            )
-          );
-        }
-      }
+      await apiFetch("/admin/organizations", {
+        method: "POST",
+        body: JSON.stringify({
+          name: form.name,
+          type: form.type,
+          city: form.city,
+          address: form.address,
+          phone: form.phone,
+          email: form.email,
+          password: form.password,
+        }),
+      }, token);
       await loadOrgs();
       setShowForm(false);
     } catch (e: any) {
-      setError(e.message || "Erreur lors de la sauvegarde");
+      setError(e.message || "Erreur lors de la création");
     } finally { setSaving(false); }
   }
 
-  async function toggleActive(org: Organization) {
+  async function handleToggleBlock(org: OrgWithAccount) {
+    if (!org.userId) return;
+    setBlockingId(org.id);
     try {
-      await apiFetch(`/organizations/${org.id}`, {
-        method: "PUT",
-        body: JSON.stringify({ name: org.name, type: org.type, isActive: !org.isActive }),
-      }, token);
-      setOrgs(prev => prev.map(o => o.id === org.id ? { ...o, isActive: !o.isActive } : o));
-    } catch {}
+      const res = await apiFetch<{ blocked: boolean }>(
+        `/admin/organizations/${org.id}/toggle-block`,
+        { method: "PUT" },
+        token
+      );
+      setOrgs(prev => prev.map(o =>
+        o.id === org.id ? { ...o, blocked: res.blocked } : o
+      ));
+    } catch {} finally { setBlockingId(null); }
   }
 
   const filtered = orgs.filter(o =>
     o.name.toLowerCase().includes(search.toLowerCase()) ||
     (o.city ?? "").toLowerCase().includes(search.toLowerCase())
   );
-
-  const suggestedServices = SERVICES_BY_TYPE[form.type] ?? [];
 
   return (
     <AdminLayout>
@@ -214,9 +149,7 @@ export default function AdminOrganizations() {
           <Card className="mb-6 border-violet-200 shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {editingId ? "Modifier l'organisation" : "Nouvelle organisation"}
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-900">Nouvelle organisation</h2>
                 <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
                   <X className="w-5 h-5" />
                 </button>
@@ -224,7 +157,7 @@ export default function AdminOrganizations() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1.5">
-                  <Label>Nom *</Label>
+                  <Label>Nom de l'établissement *</Label>
                   <Input
                     placeholder="Clinique El Menzah"
                     value={form.name}
@@ -237,7 +170,7 @@ export default function AdminOrganizations() {
                   <select
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={form.type}
-                    onChange={e => handleTypeChange(e.target.value)}
+                    onChange={e => setForm(p => ({ ...p, type: e.target.value }))}
                   >
                     {ORG_TYPES.map(t => (
                       <option key={t.value} value={t.value}>{t.label}</option>
@@ -278,7 +211,7 @@ export default function AdminOrganizations() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Email</Label>
+                  <Label>Email du compte *</Label>
                   <Input
                     placeholder="contact@clinique.tn"
                     type="email"
@@ -286,51 +219,30 @@ export default function AdminOrganizations() {
                     onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                   />
                 </div>
-              </div>
 
-              {!editingId && suggestedServices.length > 0 && (
-                <div className="mt-5">
-                  <Label className="block mb-2">
-                    Services disponibles
-                    <span className="ml-2 text-xs text-gray-400 font-normal">
-                      Sélectionner les services à créer
-                    </span>
-                  </Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
-                    {suggestedServices.map(svc => {
-                      const checked = form.selectedServices.includes(svc);
-                      return (
-                        <label
-                          key={svc}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
-                            checked
-                              ? "bg-violet-100 text-violet-700 border border-violet-300"
-                              : "bg-white border border-gray-200 text-gray-700 hover:border-violet-200"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            className="hidden"
-                            checked={checked}
-                            onChange={() => toggleService(svc)}
-                          />
-                          <span className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${
-                            checked ? "bg-violet-600" : "bg-gray-200"
-                          }`}>
-                            {checked && <Check className="w-3 h-3 text-white" />}
-                          </span>
-                          {svc}
-                        </label>
-                      );
-                    })}
+                <div className="col-span-2 space-y-1.5">
+                  <Label>Mot de passe du compte *</Label>
+                  <div className="relative">
+                    <Input
+                      type={showPass ? "text" : "password"}
+                      placeholder="Minimum 6 caractères"
+                      value={form.password}
+                      onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  {form.selectedServices.length > 0 && (
-                    <p className="mt-1.5 text-xs text-violet-600 font-medium">
-                      {form.selectedServices.length} service(s) sélectionné(s)
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-400">
+                    Ces identifiants seront utilisés par l'organisation pour se connecter
+                  </p>
                 </div>
-              )}
+              </div>
 
               {error && (
                 <p className="mt-3 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
@@ -339,8 +251,8 @@ export default function AdminOrganizations() {
               <div className="flex gap-3 mt-5 justify-end">
                 <Button variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
                 <Button onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700">
-                  {saving ? "Sauvegarde..." : (
-                    <><Check className="w-4 h-4 mr-1" /> {editingId ? "Modifier" : "Créer"}</>
+                  {saving ? "Création..." : (
+                    <><Check className="w-4 h-4 mr-1" /> Créer</>
                   )}
                 </Button>
               </div>
@@ -372,36 +284,59 @@ export default function AdminOrganizations() {
         ) : (
           <div className="space-y-3">
             {filtered.map(org => (
-              <Card key={org.id} className={!org.isActive ? "opacity-60" : ""}>
+              <Card key={org.id} className={org.blocked ? "opacity-60 border-red-200" : ""}>
                 <CardContent className="p-4 flex items-center gap-4">
-                  <div className="w-11 h-11 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-5 h-5 text-violet-600" />
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    org.blocked ? "bg-red-100" : "bg-violet-100"
+                  }`}>
+                    <Building2 className={`w-5 h-5 ${org.blocked ? "text-red-500" : "text-violet-600"}`} />
                   </div>
+
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <p className="font-semibold text-gray-900">{org.name}</p>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${TYPE_COLORS[org.type] ?? TYPE_COLORS.OTHER}`}>
                         {ORG_TYPES.find(t => t.value === org.type)?.label ?? org.type}
                       </span>
+                      {org.blocked && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-600 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Bloqué
+                        </span>
+                      )}
+                      {!org.blocked && org.userId && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                          Actif
+                        </span>
+                      )}
+                      {!org.userId && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                          Sans compte
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-500 truncate">
-                      {[org.city, org.address, org.phone].filter(Boolean).join(" · ") || "Pas d'infos supplémentaires"}
+                      {[org.city, org.address, org.email].filter(Boolean).join(" · ") || "Pas d'infos supplémentaires"}
                     </p>
                   </div>
+
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => toggleActive(org)}
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${
-                        org.isActive
-                          ? "bg-green-100 text-green-700 hover:bg-green-200"
-                          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                      }`}
-                    >
-                      {org.isActive ? "Actif" : "Inactif"}
-                    </button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(org)}>
-                      <Pencil className="w-4 h-4 text-gray-500" />
-                    </Button>
+                    {org.userId && (
+                      <button
+                        onClick={() => handleToggleBlock(org)}
+                        disabled={blockingId === org.id}
+                        title={org.blocked ? "Débloquer le compte" : "Bloquer le compte"}
+                        className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                          org.blocked
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-red-100 text-red-600 hover:bg-red-200"
+                        } ${blockingId === org.id ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        {org.blocked
+                          ? <><Unlock className="w-3 h-3" /> Débloquer</>
+                          : <><Lock className="w-3 h-3" /> Bloquer</>
+                        }
+                      </button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

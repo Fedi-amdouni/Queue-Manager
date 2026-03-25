@@ -1,5 +1,6 @@
 package com.waitless.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.waitless.model.enums.OrgType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +40,7 @@ public class Organization {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<ServiceDept> services;

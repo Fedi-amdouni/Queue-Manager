@@ -33,6 +33,9 @@ public class User {
     @Column(name = "organization_id")
     private Long organizationId;
 
+    @Column(name = "is_blocked")
+    private boolean blocked = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

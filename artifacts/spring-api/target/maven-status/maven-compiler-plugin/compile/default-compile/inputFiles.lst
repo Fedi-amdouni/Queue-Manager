@@ -2,6 +2,7 @@
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/model/Organization.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/dto/LoginRequest.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/controller/DashboardController.java
+/home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/dto/CreateOrgWithAccountRequest.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/model/User.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/controller/QueueController.java
 /home/runner/workspace/artifacts/spring-api/src/main/java/com/waitless/repository/UserRepository.java

@@ -35,6 +35,7 @@ com/waitless/model/QueueTicket$QueueTicketBuilder.class
 com/waitless/model/ServiceDept$ServiceDeptBuilder.class
 com/waitless/dto/OrganizationDTO.class
 com/waitless/model/Resource$ResourceBuilder.class
+com/waitless/dto/CreateOrgWithAccountRequest.class
 com/waitless/model/Organization$OrganizationBuilder.class
 com/waitless/controller/AdminController.class
 com/waitless/dto/AuthResponse$AuthResponseBuilder.class
