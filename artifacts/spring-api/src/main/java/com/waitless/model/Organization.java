@@ -25,6 +25,7 @@ public class Organization {
     @Column(nullable = false)
     private OrgType type;
 
+    private String city;
     private String address;
     private String phone;
     private String email;

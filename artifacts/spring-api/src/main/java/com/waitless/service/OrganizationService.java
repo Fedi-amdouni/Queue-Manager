@@ -28,6 +28,7 @@ public class OrganizationService {
         Organization org = Organization.builder()
                 .name(dto.getName())
                 .type(dto.getType())
+                .city(dto.getCity())
                 .address(dto.getAddress())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
@@ -41,6 +42,7 @@ public class OrganizationService {
         Organization org = findById(id);
         if (dto.getName() != null) org.setName(dto.getName());
         if (dto.getType() != null) org.setType(dto.getType());
+        if (dto.getCity() != null) org.setCity(dto.getCity());
         if (dto.getAddress() != null) org.setAddress(dto.getAddress());
         if (dto.getPhone() != null) org.setPhone(dto.getPhone());
         if (dto.getEmail() != null) org.setEmail(dto.getEmail());
